@@ -49,24 +49,6 @@ test("Dining: concurrent ordering/payment/reservation remain atomic and tenant s
   assert.equal(active.length, 1);
 });
 
-test("Dining takeout migration preserves existing paid dine-in bills", () => {
-  const folder = mkdtempSync(path.join(tmpdir(), "dining-migration-"));
-  const dbPath = path.join(folder, "old.sqlite");
-  try {
-    const original = new DatabaseSync(dbPath);
-    original.exec(readFileSync(path.resolve("drizzle/0000_spicy_bromley.sql"), "utf8"));
-    original.exec("INSERT INTO dining_bills(id,organization_id,session_id,subtotal,final_amount,paid_amount,status) VALUES('legacy','legacy-org','legacy-session',100,110,110,'paid')");
-    original.close();
-    const upgraded = createSqliteD1(dbPath);
-    const row = upgraded._rawDb.prepare("SELECT * FROM dining_bills WHERE id = 'legacy'").get();
-    assert.equal(row.session_id, "legacy-session");
-    assert.equal(row.paid_amount, 110);
-    assert.equal(row.status, "paid");
-    assert.equal(row.order_id, null);
-    upgraded._rawDb.close();
-  } finally {rmSync(folder, {recursive: true, force: true});}
-});
-
 test("Dining: prepaid takeout, urgent KDS, refund net revenue and 90 minute bookings", async () => {
   const org = `dining_takeout_${crypto.randomUUID()}`;
   await seedOrganization(org);

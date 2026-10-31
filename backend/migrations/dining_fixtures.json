@@ -1,0 +1,229 @@
+{
+  "dining_kitchen_tickets": [
+    {
+      "id": "din_kt_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "order_id": "din_ord_01_org_go_fixture",
+      "order_item_id": "din_oi_01_org_go_fixture",
+      "station": "cold_bar",
+      "item_name": "手熬黑糖珍珠鮮奶",
+      "quantity": 1,
+      "modifiers_text": "微糖 (3分)",
+      "status": "received",
+      "urgent_flag": 0,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_kt_02_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "order_id": "din_ord_01_org_go_fixture",
+      "order_item_id": "din_oi_02_org_go_fixture",
+      "station": "hot_kitchen",
+      "item_name": "松露黑醋牛肝菌燉飯 (前菜分享版)",
+      "quantity": 1,
+      "modifiers_text": "",
+      "status": "received",
+      "urgent_flag": 0,
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_locations": [
+    {
+      "id": "din_loc_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "TableCraft 示範餐廳 A",
+      "service_fee_rate": 10,
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_menu_items": [
+    {
+      "id": "din_menu_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "炭烤特級肋眼牛排",
+      "category": "排餐",
+      "price": 450,
+      "is_sold_out": 0,
+      "station": "hot_kitchen",
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_menu_02_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "松露黑醋牛肝菌燉飯",
+      "category": "主食",
+      "price": 320,
+      "is_sold_out": 0,
+      "station": "hot_kitchen",
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_menu_03_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "手熬黑糖珍珠鮮奶",
+      "category": "飲品",
+      "price": 100,
+      "is_sold_out": 0,
+      "station": "cold_bar",
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_menu_04_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "限量法式主廚威靈頓牛排",
+      "category": "限定",
+      "price": 680,
+      "is_sold_out": 1,
+      "station": "hot_kitchen",
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_modifier_groups": [
+    {
+      "id": "din_modg_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "甜度 (必選)",
+      "min_selection": 1,
+      "max_selection": 1,
+      "is_required": 1,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_modg_02_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "name": "加料升級",
+      "min_selection": 0,
+      "max_selection": 3,
+      "is_required": 0,
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_modifier_options": [
+    {
+      "id": "din_modo_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "group_id": "din_modg_01_org_go_fixture",
+      "name": "無糖 (0分)",
+      "additional_price": 0,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_modo_02_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "group_id": "din_modg_01_org_go_fixture",
+      "name": "微糖 (3分)",
+      "additional_price": 0,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_modo_03_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "group_id": "din_modg_01_org_go_fixture",
+      "name": "正常糖 (全糖)",
+      "additional_price": 0,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_modo_04_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "group_id": "din_modg_02_org_go_fixture",
+      "name": "雙份手工黑糖珍珠",
+      "additional_price": 10,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_modo_05_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "group_id": "din_modg_02_org_go_fixture",
+      "name": "日式特濃奶蓋",
+      "additional_price": 20,
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_order_items": [
+    {
+      "id": "din_oi_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "order_id": "din_ord_01_org_go_fixture",
+      "menu_item_id": "din_menu_03_org_go_fixture",
+      "item_name": "手熬黑糖珍珠鮮奶",
+      "unit_price": 100,
+      "quantity": 1,
+      "modifiers_json": "[{\"name\":\"微糖 (3分)\"}]",
+      "line_total": 100,
+      "status": "preparing",
+      "cancelled_reason": null,
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_oi_02_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "order_id": "din_ord_01_org_go_fixture",
+      "menu_item_id": "din_menu_02_org_go_fixture",
+      "item_name": "松露黑醋牛肝菌燉飯 (前菜分享版)",
+      "unit_price": 200,
+      "quantity": 1,
+      "modifiers_json": null,
+      "line_total": 200,
+      "status": "preparing",
+      "cancelled_reason": null,
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_orders": [
+    {
+      "id": "din_ord_01_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "session_id": "din_sess_a2_org_go_fixture",
+      "order_type": "dine_in",
+      "takeout_number": null,
+      "subtotal": 300,
+      "service_charge": 30,
+      "total_amount": 330,
+      "status": "placed",
+      "idempotency_key": null,
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ],
+  "dining_table_sessions": [
+    {
+      "id": "din_sess_a2_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "table_id": "din_tbl_a2_org_go_fixture",
+      "session_token": "token_tbl_a2_org_go_fixture",
+      "guest_count": 2,
+      "status": "active",
+      "opened_at": "2026-10-30 16:30:21",
+      "closed_at": null
+    }
+  ],
+  "dining_tables": [
+    {
+      "id": "din_tbl_a1_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "location_id": "din_loc_01_org_go_fixture",
+      "table_number": "A1",
+      "capacity": 4,
+      "status": "vacant",
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_tbl_a2_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "location_id": "din_loc_01_org_go_fixture",
+      "table_number": "A2",
+      "capacity": 4,
+      "status": "occupied",
+      "created_at": "2026-10-30 16:30:21"
+    },
+    {
+      "id": "din_tbl_b1_org_go_fixture",
+      "organization_id": "org_go_fixture",
+      "location_id": "din_loc_01_org_go_fixture",
+      "table_number": "B1",
+      "capacity": 2,
+      "status": "vacant",
+      "created_at": "2026-10-30 16:30:21"
+    }
+  ]
+}
