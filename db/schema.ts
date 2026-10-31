@@ -120,21 +120,6 @@ export const mesMaterialLots = sqliteTable("mes_material_lots", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const mesQualityChecks = sqliteTable("mes_quality_checks", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id").notNull(),
-  workOrderId: text("work_order_id").notNull(),
-  reportId: text("report_id"),
-  inspectorId: text("inspector_id").notNull(),
-  sampleQuantity: integer("sample_quantity").notNull(),
-  passedQuantity: integer("passed_quantity").notNull(),
-  failedQuantity: integer("failed_quantity").notNull(),
-  status: text("status").notNull().default("passed"), // passed, quarantined, reworked
-  disposition: text("disposition"),
-  notes: text("notes"),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-});
-
 export const erpItems = sqliteTable("erp_items", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id").notNull(),
