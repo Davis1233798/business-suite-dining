@@ -42,7 +42,7 @@ jobs:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/business-suite-dining"
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/business-suite-dining-station"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           docker tag dining-ci:${GITHUB_SHA} "$image:${GITHUB_SHA}"
           docker push "$image:${GITHUB_SHA}"
