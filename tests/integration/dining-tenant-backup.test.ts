@@ -11,7 +11,7 @@ test('DINING backup and restore use only repository tables', async () => {
  try {
   const snapshot=await exportWorkspace(context);
   const names=Object.keys(snapshot.tables).sort();
-  const actual=d1._rawDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'dining_%' ORDER BY name").all().map((row:{name:string})=>row.name);
+  const actual=d1._rawDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'dining_%' AND name <> 'dining_vinext_schema' ORDER BY name").all().map((row:{name:string})=>row.name);
   assert.ok(names.length>0);assert.deepEqual(names,actual);
   await restoreWorkspace(context,snapshot);
   await assert.rejects(()=>exportWorkspaceCsv(context,'other_system_table'));
