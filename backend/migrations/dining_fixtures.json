@@ -6,9 +6,9 @@
       "order_id": "din_ord_01_org_go_fixture",
       "order_item_id": "din_oi_01_org_go_fixture",
       "station": "cold_bar",
-      "item_name": "手熬黑糖珍珠鮮奶",
+      "item_name": "Brown sugar pearl milk",
       "quantity": 1,
-      "modifiers_text": "微糖 (3分)",
+      "modifiers_text": "Light sugar (30%)",
       "status": "received",
       "urgent_flag": 0,
       "created_at": "2026-10-30 16:30:21"
@@ -19,7 +19,7 @@
       "order_id": "din_ord_01_org_go_fixture",
       "order_item_id": "din_oi_02_org_go_fixture",
       "station": "hot_kitchen",
-      "item_name": "松露黑醋牛肝菌燉飯 (前菜分享版)",
+      "item_name": "Truffle mushroom risotto (sharing)",
       "quantity": 1,
       "modifiers_text": "",
       "status": "received",
@@ -31,7 +31,7 @@
     {
       "id": "din_loc_01_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "TableCraft 示範餐廳 A",
+      "name": "TableCraft Demo Restaurant A",
       "service_fee_rate": 10,
       "created_at": "2026-10-30 16:30:21"
     }
@@ -40,8 +40,8 @@
     {
       "id": "din_menu_01_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "炭烤特級肋眼牛排",
-      "category": "排餐",
+      "name": "Chargrilled ribeye steak",
+      "category": "Steak",
       "price": 450,
       "is_sold_out": 0,
       "station": "hot_kitchen",
@@ -50,8 +50,8 @@
     {
       "id": "din_menu_02_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "松露黑醋牛肝菌燉飯",
-      "category": "主食",
+      "name": "Truffle mushroom risotto",
+      "category": "Main course",
       "price": 320,
       "is_sold_out": 0,
       "station": "hot_kitchen",
@@ -60,8 +60,8 @@
     {
       "id": "din_menu_03_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "手熬黑糖珍珠鮮奶",
-      "category": "飲品",
+      "name": "Brown sugar pearl milk",
+      "category": "Drinks",
       "price": 100,
       "is_sold_out": 0,
       "station": "cold_bar",
@@ -70,8 +70,8 @@
     {
       "id": "din_menu_04_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "限量法式主廚威靈頓牛排",
-      "category": "限定",
+      "name": "Limited chef beef Wellington",
+      "category": "Special",
       "price": 680,
       "is_sold_out": 1,
       "station": "hot_kitchen",
@@ -82,7 +82,7 @@
     {
       "id": "din_modg_01_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "甜度 (必選)",
+      "name": "Sweetness (required)",
       "min_selection": 1,
       "max_selection": 1,
       "is_required": 1,
@@ -91,7 +91,7 @@
     {
       "id": "din_modg_02_org_go_fixture",
       "organization_id": "org_go_fixture",
-      "name": "加料升級",
+      "name": "Add-ons",
       "min_selection": 0,
       "max_selection": 3,
       "is_required": 0,
@@ -103,7 +103,7 @@
       "id": "din_modo_01_org_go_fixture",
       "organization_id": "org_go_fixture",
       "group_id": "din_modg_01_org_go_fixture",
-      "name": "無糖 (0分)",
+      "name": "No sugar (0%)",
       "additional_price": 0,
       "created_at": "2026-10-30 16:30:21"
     },
@@ -111,7 +111,7 @@
       "id": "din_modo_02_org_go_fixture",
       "organization_id": "org_go_fixture",
       "group_id": "din_modg_01_org_go_fixture",
-      "name": "微糖 (3分)",
+      "name": "Light sugar (30%)",
       "additional_price": 0,
       "created_at": "2026-10-30 16:30:21"
     },
@@ -119,7 +119,7 @@
       "id": "din_modo_03_org_go_fixture",
       "organization_id": "org_go_fixture",
       "group_id": "din_modg_01_org_go_fixture",
-      "name": "正常糖 (全糖)",
+      "name": "Regular sugar",
       "additional_price": 0,
       "created_at": "2026-10-30 16:30:21"
     },
@@ -127,7 +127,7 @@
       "id": "din_modo_04_org_go_fixture",
       "organization_id": "org_go_fixture",
       "group_id": "din_modg_02_org_go_fixture",
-      "name": "雙份手工黑糖珍珠",
+      "name": "Double brown sugar pearls",
       "additional_price": 10,
       "created_at": "2026-10-30 16:30:21"
     },
@@ -135,7 +135,7 @@
       "id": "din_modo_05_org_go_fixture",
       "organization_id": "org_go_fixture",
       "group_id": "din_modg_02_org_go_fixture",
-      "name": "日式特濃奶蓋",
+      "name": "Cream topping",
       "additional_price": 20,
       "created_at": "2026-10-30 16:30:21"
     }
@@ -146,10 +146,10 @@
       "organization_id": "org_go_fixture",
       "order_id": "din_ord_01_org_go_fixture",
       "menu_item_id": "din_menu_03_org_go_fixture",
-      "item_name": "手熬黑糖珍珠鮮奶",
+      "item_name": "Brown sugar pearl milk",
       "unit_price": 100,
       "quantity": 1,
-      "modifiers_json": "[{\"name\":\"微糖 (3分)\"}]",
+      "modifiers_json": "[{\"name\":\"Light sugar (30%)\"}]",
       "line_total": 100,
       "status": "preparing",
       "cancelled_reason": null,
@@ -160,7 +160,7 @@
       "organization_id": "org_go_fixture",
       "order_id": "din_ord_01_org_go_fixture",
       "menu_item_id": "din_menu_02_org_go_fixture",
-      "item_name": "松露黑醋牛肝菌燉飯 (前菜分享版)",
+      "item_name": "Truffle mushroom risotto (sharing)",
       "unit_price": 200,
       "quantity": 1,
       "modifiers_json": null,

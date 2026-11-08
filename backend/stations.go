@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -15,7 +16,20 @@ type Dataset struct {
 }
 
 var datasets = map[string][]Dataset{
-	"dining": {{"tables", "dining_tables", "Tables", []string{"id", "table_number", "capacity", "status"}}, {"orders", "dining_orders", "Orders", []string{"id", "takeout_number", "status", "created_at"}}, {"orderItems", "dining_order_items", "Order items", nil}, {"menuItems", "dining_menu_items", "Menu", []string{"id", "name", "price", "category", "is_sold_out"}}, {"bills", "dining_bills", "Bills", nil}, {"reservations", "dining_reservations", "Reservations", nil}},
+	"dining": {
+		{"modifierGroups", "dining_modifier_groups", "Modifier groups", []string{"id", "name", "min_selection", "max_selection", "is_required"}},
+		{"modifierOptions", "dining_modifier_options", "Modifier options", []string{"id", "group_id", "name", "additional_price"}},
+		{"locations", "dining_locations", "Locations", []string{"id", "name", "service_fee_rate"}},
+		{"sessions", "dining_table_sessions", "Table sessions", []string{"id", "table_id", "guest_count", "status", "opened_at"}},
+		{"kitchenTickets", "dining_kitchen_tickets", "Kitchen tickets", []string{"id", "order_id", "order_item_id", "station", "item_name", "quantity", "modifiers_text", "status", "urgent_flag", "created_at"}},
+		{"tables", "dining_tables", "Tables", []string{"id", "location_id", "table_number", "capacity", "status"}},
+		{"orders", "dining_orders", "Orders", []string{"id", "session_id", "takeout_number", "status", "created_at"}},
+		{"orderItems", "dining_order_items", "Order items", []string{"id", "order_id", "item_name", "quantity", "line_total", "status"}},
+		{"menuItems", "dining_menu_items", "Menu", []string{"id", "name", "price", "category", "is_sold_out"}},
+		{"bills", "dining_bills", "Bills", nil},
+		{"payments", "dining_payments", "Payments", nil},
+		{"reservations", "dining_reservations", "Reservations", []string{"id", "table_id", "guest_count", "reservation_time", "status"}},
+	},
 }
 
 func camel(s string) string {
@@ -27,6 +41,7 @@ func camel(s string) string {
 	}
 	return strings.Join(parts, "")
 }
+
 func queryMaps(db *sql.DB, query string, args ...any) ([]map[string]any, error) {
 	rows, e := db.Query(query, args...)
 	if e != nil {
@@ -58,6 +73,7 @@ func queryMaps(db *sql.DB, query string, args ...any) ([]map[string]any, error) 
 	}
 	return out, rows.Err()
 }
+
 func (a *App) stationAPI(w http.ResponseWriter, r *http.Request) {
 	site, action := r.PathValue("site"), r.PathValue("action")
 	if !knownSite(site) {
@@ -80,8 +96,26 @@ func (a *App) stationAPI(w http.ResponseWriter, r *http.Request) {
 			fail(w, 403, "Front-office accounts cannot read back-office data")
 			return
 		}
+		requestedDataset := r.URL.Query().Get("dataset")
+		search := strings.TrimSpace(r.URL.Query().Get("search"))
+		if len(search) > 200 || (search != "" && requestedDataset == "") {
+			fail(w, 400, "Invalid dataset search")
+			return
+		}
+		offset := 0
+		if raw := r.URL.Query().Get("offset"); raw != "" {
+			var err error
+			offset, err = strconv.Atoi(raw)
+			if err != nil || offset < 0 || offset > 1000000 || requestedDataset == "" {
+				fail(w, 400, "Invalid dataset offset")
+				return
+			}
+		}
 		out := map[string]any{}
 		for _, d := range datasets[site] {
+			if requestedDataset != "" && d.Key != requestedDataset {
+				continue
+			}
 			if front && len(d.Front) == 0 {
 				continue
 			}
@@ -91,12 +125,69 @@ func (a *App) stationAPI(w http.ResponseWriter, r *http.Request) {
 			}
 			query := "SELECT " + columns + " FROM " + d.Table + " WHERE organization_id=?"
 			args := []any{id.OrganizationID}
-			rows, err := queryMaps(a.db, query+" ORDER BY rowid DESC LIMIT 500", args...)
+			if search != "" {
+				searchColumns := d.Front
+				if !front {
+					searchColumns = nil
+					info, err := a.db.Query("PRAGMA table_info(" + d.Table + ")")
+					if err != nil {
+						fail(w, 500, "Unable to search workspace data")
+						return
+					}
+					for info.Next() {
+						var cid, notnull, pk int
+						var name, typ string
+						var defaultValue any
+						if err = info.Scan(&cid, &name, &typ, &notnull, &defaultValue, &pk); err != nil {
+							break
+						}
+						if name != "organization_id" {
+							searchColumns = append(searchColumns, name)
+						}
+					}
+					if err == nil {
+						err = info.Err()
+					}
+					info.Close()
+					if err != nil {
+						fail(w, 500, "Unable to search workspace data")
+						return
+					}
+				}
+				terms := make([]string, 0, len(searchColumns))
+				for _, column := range searchColumns {
+					terms = append(terms, "instr(lower(CAST(\""+strings.ReplaceAll(column, "\"", "\"\"")+"\" AS TEXT)), lower(?)) > 0")
+					args = append(args, search)
+				}
+				if len(terms) == 0 {
+					fail(w, 400, "Dataset cannot be searched")
+					return
+				}
+				query += " AND (" + strings.Join(terms, " OR ") + ")"
+			}
+			args = append(args, offset)
+			rows, err := queryMaps(a.db, query+" ORDER BY rowid DESC LIMIT 500 OFFSET ?", args...)
 			if err != nil {
 				fail(w, 500, "Unable to read workspace data: "+d.Key)
 				return
 			}
 			out[d.Key] = rows
+		}
+		if requestedDataset != "" {
+			if _, exists := out[requestedDataset]; !exists {
+				fail(w, 404, "Dataset unavailable")
+				return
+			}
+			ok(w, out)
+			return
+		}
+		if site == "dining" {
+			rows, err := queryMaps(a.db, `SELECT s.id AS session_id,l.service_fee_rate,COALESCE(SUM(CASE WHEN o.status='placed' AND i.status!='cancelled' THEN i.line_total ELSE 0 END),0) AS subtotal FROM dining_table_sessions s JOIN dining_tables t ON t.id=s.table_id AND t.organization_id=s.organization_id JOIN dining_locations l ON l.id=t.location_id AND l.organization_id=s.organization_id LEFT JOIN dining_orders o ON o.session_id=s.id AND o.organization_id=s.organization_id LEFT JOIN dining_order_items i ON i.order_id=o.id AND i.organization_id=o.organization_id WHERE s.organization_id=? AND s.status='active' GROUP BY s.id,l.service_fee_rate ORDER BY s.rowid DESC LIMIT 500`, id.OrganizationID)
+			if err != nil {
+				fail(w, 500, "Unable to calculate table bills")
+				return
+			}
+			out["billSummaries"] = rows
 		}
 		ok(w, out)
 		return
@@ -128,8 +219,25 @@ func (a *App) stationAPI(w http.ResponseWriter, r *http.Request) {
 		a.printData(w, r, id, site)
 		return
 	}
+	if action == "service" && site == "dining" {
+		a.diningService(w, r, id, g)
+		return
+	}
+	if action == "order" && site == "dining" {
+		a.diningOrder(w, r, id, g)
+		return
+	}
+	if action == "table" && site == "dining" {
+		a.diningTable(w, r, id, g)
+		return
+	}
+	if action == "business" && site == "dining" {
+		a.diningBusiness(w, r, id, g)
+		return
+	}
 	fail(w, 501, "This operation has not been migrated to Go. No changes were made")
 }
+
 func (a *App) manageUser(w http.ResponseWriter, r *http.Request, id *Identity, site string) {
 	var input struct {
 		UserID   string `json:"userId"`
@@ -201,7 +309,8 @@ func (a *App) manageUser(w http.ResponseWriter, r *http.Request, id *Identity, s
 type PrintKind struct{ Site, Dataset, Title, Lines, ForeignKey string }
 
 var printKinds = map[string]PrintKind{
-	"dining-menu-label": {"dining", "menuItems", "Menu item label", "", ""}, "dining-order": {"dining", "orders", "Dining order", "dining_order_items", "order_id"},
+	"dining-menu-label": {"dining", "menuItems", "Menu item label", "", ""},
+	"dining-order":      {"dining", "orders", "Dining order", "dining_order_items", "order_id"},
 }
 
 func (a *App) printData(w http.ResponseWriter, r *http.Request, id *Identity, site string) {
