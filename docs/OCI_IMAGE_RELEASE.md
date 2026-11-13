@@ -7,3 +7,5 @@ The image workflow owns validation and publication. Private runtime
 provisioning and the public route are subsequent deployment steps.
 
 Validate the health revision in Go and in both native container builds.
+
+Pull requests validate both architectures. Pushes to main validate and publish; feature branch pushes do not start an additional matrix.
