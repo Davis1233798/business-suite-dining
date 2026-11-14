@@ -247,7 +247,7 @@ func equalDiningCounts(a, b map[string]int) bool {
 	return true
 }
 
-func TestLegacyPortfolioDiningCommandPreview(t *testing.T) {
+func TestLegacyPortfolioDiningCommandPreviewAndApply(t *testing.T) {
 	dir := t.TempDir()
 	database := filepath.Join(dir, "dining.sqlite")
 	db, err := openDB(database)
@@ -276,5 +276,31 @@ func TestLegacyPortfolioDiningCommandPreview(t *testing.T) {
 	var result legacyDiningImportResult
 	if err = json.Unmarshal(output, &result); err != nil || result.RowCount != 21 || result.Snapshot != "" {
 		t.Fatalf("unexpected preview: %s (%v)", output, err)
+	}
+	snapshot := filepath.Join(dir, "snapshot.sqlite")
+	request, err = json.Marshal(map[string]any{"database": database, "backup": source, "snapshot": snapshot, "sourceOrganization": "org_go_fixture", "destinationOrganization": "org_dining_target", "apply": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd = exec.Command("go", "run", ".", "--legacy-dining-import")
+	cmd.Stdin = bytes.NewReader(request)
+	output, err = cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("apply command failed: %v: %s", err, output)
+	}
+	if err = json.Unmarshal(output, &result); err != nil || result.RowCount != 21 || result.Snapshot == "" {
+		t.Fatalf("unexpected import: %s (%v)", output, err)
+	}
+	for path, want := range map[string]int{database: 1, snapshot: 0} {
+		connection, err := openLegacyDiningDatabase(path, "ro")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got int
+		err = connection.QueryRow("SELECT count(*) FROM dining_orders WHERE organization_id=?", "org_dining_target").Scan(&got)
+		connection.Close()
+		if err != nil || got != want {
+			t.Fatalf("orders in %s: got %d, want %d (%v)", path, got, want, err)
+		}
 	}
 }
