@@ -1,0 +1,254 @@
+{
+  "format": "business-suite/v1",
+  "organizationId": "org_go_fixture",
+  "exportedAt": "2026-10-30T16:30:21.000Z",
+  "tables": {
+    "dining_locations": [
+      {
+        "id": "din_loc_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "TableCraft Demo Restaurant A",
+        "serviceFeeRate": 10,
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_tables": [
+      {
+        "id": "din_tbl_a1_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "locationId": "din_loc_01_org_go_fixture",
+        "tableNumber": "A1",
+        "capacity": 4,
+        "status": "vacant",
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_tbl_a2_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "locationId": "din_loc_01_org_go_fixture",
+        "tableNumber": "A2",
+        "capacity": 4,
+        "status": "occupied",
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_tbl_b1_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "locationId": "din_loc_01_org_go_fixture",
+        "tableNumber": "B1",
+        "capacity": 2,
+        "status": "vacant",
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_reservations": [],
+    "dining_menu_items": [
+      {
+        "id": "din_menu_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "Chargrilled ribeye steak",
+        "category": "Steak",
+        "price": 450,
+        "isSoldOut": false,
+        "station": "hot_kitchen",
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_menu_02_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "Truffle mushroom risotto",
+        "category": "Main course",
+        "price": 320,
+        "isSoldOut": false,
+        "station": "hot_kitchen",
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_menu_03_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "Brown sugar pearl milk",
+        "category": "Drinks",
+        "price": 100,
+        "isSoldOut": false,
+        "station": "cold_bar",
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_menu_04_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "Limited chef beef Wellington",
+        "category": "Special",
+        "price": 680,
+        "isSoldOut": true,
+        "station": "hot_kitchen",
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_modifier_groups": [
+      {
+        "id": "din_modg_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "Sweetness (required)",
+        "minSelection": 1,
+        "maxSelection": 1,
+        "isRequired": true,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_modg_02_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "name": "Add-ons",
+        "minSelection": 0,
+        "maxSelection": 3,
+        "isRequired": false,
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_modifier_options": [
+      {
+        "id": "din_modo_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "groupId": "din_modg_01_org_go_fixture",
+        "name": "No sugar (0%)",
+        "additionalPrice": 0,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_modo_02_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "groupId": "din_modg_01_org_go_fixture",
+        "name": "Light sugar (30%)",
+        "additionalPrice": 0,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_modo_03_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "groupId": "din_modg_01_org_go_fixture",
+        "name": "Regular sugar",
+        "additionalPrice": 0,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_modo_04_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "groupId": "din_modg_02_org_go_fixture",
+        "name": "Double brown sugar pearls",
+        "additionalPrice": 10,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_modo_05_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "groupId": "din_modg_02_org_go_fixture",
+        "name": "Cream topping",
+        "additionalPrice": 20,
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_table_sessions": [
+      {
+        "id": "din_sess_a2_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "tableId": "din_tbl_a2_org_go_fixture",
+        "sessionToken": "token_tbl_a2_org_go_fixture",
+        "guestCount": 2,
+        "status": "active",
+        "openedAt": "2026-10-30 16:30:21",
+        "closedAt": null
+      }
+    ],
+    "dining_orders": [
+      {
+        "id": "din_ord_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "sessionId": "din_sess_a2_org_go_fixture",
+        "orderType": "dine_in",
+        "takeoutNumber": null,
+        "subtotal": 300,
+        "serviceCharge": 30,
+        "totalAmount": 330,
+        "status": "placed",
+        "idempotencyKey": null,
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_order_items": [
+      {
+        "id": "din_oi_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "orderId": "din_ord_01_org_go_fixture",
+        "menuItemId": "din_menu_03_org_go_fixture",
+        "itemName": "Brown sugar pearl milk",
+        "unitPrice": 100,
+        "quantity": 1,
+        "modifiersJson": "[{\"name\":\"Light sugar (30%)\"}]",
+        "lineTotal": 100,
+        "status": "preparing",
+        "cancelledReason": null,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_oi_02_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "orderId": "din_ord_01_org_go_fixture",
+        "menuItemId": "din_menu_02_org_go_fixture",
+        "itemName": "Truffle mushroom risotto (sharing)",
+        "unitPrice": 200,
+        "quantity": 1,
+        "modifiersJson": null,
+        "lineTotal": 200,
+        "status": "preparing",
+        "cancelledReason": null,
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_kitchen_tickets": [
+      {
+        "id": "din_kt_01_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "orderId": "din_ord_01_org_go_fixture",
+        "orderItemId": "din_oi_01_org_go_fixture",
+        "station": "cold_bar",
+        "itemName": "Brown sugar pearl milk",
+        "quantity": 1,
+        "modifiersText": "Light sugar (30%)",
+        "status": "received",
+        "urgentFlag": false,
+        "createdAt": "2026-10-30 16:30:21"
+      },
+      {
+        "id": "din_kt_02_org_go_fixture",
+        "organizationId": "org_go_fixture",
+        "orderId": "din_ord_01_org_go_fixture",
+        "orderItemId": "din_oi_02_org_go_fixture",
+        "station": "hot_kitchen",
+        "itemName": "Truffle mushroom risotto (sharing)",
+        "quantity": 1,
+        "modifiersText": "",
+        "status": "received",
+        "urgentFlag": false,
+        "createdAt": "2026-10-30 16:30:21"
+      }
+    ],
+    "dining_bills": [],
+    "dining_payments": [],
+    "pos_sales": [
+      {
+        "subtotal": 10,
+        "discountAmount": 0,
+        "paymentMethod": "cash",
+        "receiptNumber": "ignored",
+        "totalAmount": 10,
+        "isReprint": false,
+        "taxAmount": 0,
+        "organizationId": "org_go_fixture",
+        "status": "paid",
+        "createdAt": "2026-10-30T16:30:21.000Z",
+        "id": "legacy-pos-ignored",
+        "tenderAmount": 10,
+        "changeAmount": 0
+      }
+    ]
+  }
+}
