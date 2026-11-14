@@ -26,3 +26,18 @@ The source envelope is the existing Portfolio format (`format`, `organizationId`
 ## Acceptance plan
 
 First test parsing and mapping against a sanitized test envelope derived from Portfolio's checked-in legacy fixture. Verify the imported Dining rows and relationships match after tenant remapping and token rotation, while non-Dining fixture rows and destination identity tables remain untouched. Cover missing/unknown tables, invalid types, cross-tenant rows, broken references, duplicate IDs, destination conflicts, bad paths, missing schema marker, invalid organization mapping, snapshot retention, and all-or-nothing rollback. Only after those tests pass should the offline command be wired; it remains unexercised against production data.
+
+## Command line
+
+Run the built station binary with `--legacy-dining-import` and pass a JSON object on standard input. Preview is the default. For an offline import, set `apply` to true and provide a new `snapshot` path.
+
+```json
+{
+  "database": "/private/dining.sqlite",
+  "backup": "/private/portfolio-dining.json",
+  "snapshot": "/private/dining-before-import.sqlite",
+  "sourceOrganization": "org_verified_source",
+  "destinationOrganization": "org_verified_destination",
+  "apply": false
+}
+```

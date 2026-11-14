@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 )
@@ -243,4 +245,36 @@ func equalDiningCounts(a, b map[string]int) bool {
 		}
 	}
 	return true
+}
+
+func TestLegacyPortfolioDiningCommandPreview(t *testing.T) {
+	dir := t.TempDir()
+	database := filepath.Join(dir, "dining.sqlite")
+	db, err := openDB(database)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = db.Exec("INSERT INTO organizations(id,name,slug) VALUES(?,?,?)", "org_dining_target", "Target", "target")
+	closeErr := db.Close()
+	if err != nil || closeErr != nil {
+		t.Fatalf("prepare destination: %v / %v", err, closeErr)
+	}
+	source := filepath.Join(dir, "portfolio.json")
+	if err = os.WriteFile(source, portfolioDiningFixture(t), 0600); err != nil {
+		t.Fatal(err)
+	}
+	request, err := json.Marshal(map[string]any{"database": database, "backup": source, "sourceOrganization": "org_go_fixture", "destinationOrganization": "org_dining_target"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("go", "run", ".", "--legacy-dining-import")
+	cmd.Stdin = bytes.NewReader(request)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("preview command failed: %v: %s", err, output)
+	}
+	var result legacyDiningImportResult
+	if err = json.Unmarshal(output, &result); err != nil || result.RowCount != 21 || result.Snapshot != "" {
+		t.Fatalf("unexpected preview: %s (%v)", output, err)
+	}
 }
