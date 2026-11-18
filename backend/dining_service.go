@@ -170,7 +170,7 @@ func (a *App) diningService(w http.ResponseWriter, r *http.Request, id *Identity
 		entity = in.OrderID
 		var bill, status string
 		var paid int64
-		e = tx.QueryRow("SELECT b.id,b.status,b.paid_amount FROM dining_bills b JOIN dining_orders o ON o.id=b.order_id AND o.organization_id=b.organization_id WHERE o.organization_id=? AND o.id=? AND o.order_type='takeout'", id.OrganizationID, entity).Scan(&bill, &status, &paid)
+		e = tx.QueryRow(`SELECT b.id,b.status,b.paid_amount FROM dining_bills b LEFT JOIN dining_orders o ON (o.id=b.order_id OR (b.session_id IS NOT NULL AND b.session_id=o.session_id)) WHERE b.organization_id=? AND (o.id=? OR b.id=?) LIMIT 1`, id.OrganizationID, entity, entity).Scan(&bill, &status, &paid)
 		if errors.Is(e, sql.ErrNoRows) {
 			fail(w, 404, "Takeout order not found")
 			return
