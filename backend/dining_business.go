@@ -26,8 +26,30 @@ func (a *App) diningBusiness(w http.ResponseWriter, r *http.Request, id *Identit
 	}
 	next := map[string]string{"received": "cooking", "cooking": "done", "done": "served"}
 	itemStatus := map[string]string{"cooking": "preparing", "done": "ready", "served": "served"}
-	if next[in.Expected] == "" || next[in.Expected] != in.Next {
+	canonical := func(s string) string {
+		switch s {
+		case "ordered", "pending":
+			return "received"
+		case "preparing":
+			return "cooking"
+		case "ready":
+			return "done"
+		default:
+			return s
+		}
+	}
+	expected := canonical(in.Expected)
+	target := canonical(in.Next)
+	if expected == "served" {
+		fail(w, 409, "Ticket is already served; cannot reverse or transition")
+		return
+	}
+	if in.Expected == "received" && in.Next == "served" {
 		fail(w, 400, "Invalid kitchen transition")
+		return
+	}
+	if next[expected] == "" || next[expected] != target {
+		fail(w, 409, "Invalid kitchen state transition")
 		return
 	}
 	tx, e := a.db.BeginTx(r.Context(), nil)
@@ -46,11 +68,11 @@ func (a *App) diningBusiness(w http.ResponseWriter, r *http.Request, id *Identit
 		fail(w, 503, "Cannot read ticket")
 		return
 	}
-	if state != in.Expected || itemState == "cancelled" {
+	if canonical(state) != expected || itemState == "cancelled" {
 		fail(w, 409, "Ticket changed or item was cancelled; refresh")
 		return
 	}
-	result, e := tx.Exec("UPDATE dining_kitchen_tickets SET status=? WHERE id=? AND organization_id=? AND status=?", in.Next, in.TicketID, id.OrganizationID, in.Expected)
+	result, e := tx.Exec("UPDATE dining_kitchen_tickets SET status=? WHERE id=? AND organization_id=? AND status=?", target, in.TicketID, id.OrganizationID, state)
 	if e != nil {
 		fail(w, 503, "Cannot update ticket")
 		return
@@ -60,12 +82,12 @@ func (a *App) diningBusiness(w http.ResponseWriter, r *http.Request, id *Identit
 		fail(w, 409, "Ticket changed; refresh")
 		return
 	}
-	_, e = tx.Exec("UPDATE dining_order_items SET status=? WHERE id=? AND organization_id=? AND status!='cancelled'", itemStatus[in.Next], item, id.OrganizationID)
-	if e == nil && in.Next == "served" {
+	_, e = tx.Exec("UPDATE dining_order_items SET status=? WHERE id=? AND organization_id=? AND status!='cancelled'", itemStatus[target], item, id.OrganizationID)
+	if e == nil && target == "served" {
 		_, e = tx.Exec("UPDATE dining_orders SET status='completed' WHERE id=? AND organization_id=? AND order_type='takeout' AND NOT EXISTS (SELECT 1 FROM dining_kitchen_tickets WHERE organization_id=? AND order_id=? AND status!='served')", order, id.OrganizationID, id.OrganizationID, order)
 	}
 	if e == nil {
-		_, e = tx.Exec("INSERT INTO audit_events(id,organization_id,actor_id,actor_role,action,entity_type,entity_id,before_value,after_value) VALUES(?,?,?,?,'dining.kitchen','dining_ticket',?,?,?)", "audit_"+token(), id.OrganizationID, id.UserID, grant.Role, in.TicketID, in.Expected, in.Next)
+		_, e = tx.Exec("INSERT INTO audit_events(id,organization_id,actor_id,actor_role,action,entity_type,entity_id,before_value,after_value) VALUES(?,?,?,?,'dining.kitchen','dining_ticket',?,?,?)", "audit_"+token(), id.OrganizationID, id.UserID, grant.Role, in.TicketID, state, target)
 	}
 	if e != nil {
 		fail(w, 503, "Cannot save kitchen transition")

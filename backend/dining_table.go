@@ -7,15 +7,22 @@ import (
 	"net/http"
 )
 
+type diningSplit struct {
+	SplitIndex    int    `json:"splitIndex"`
+	Amount        int64  `json:"amount"`
+	PaymentMethod string `json:"paymentMethod"`
+}
+
 type diningTableRequest struct {
-	Action        string `json:"action"`
-	TableID       string `json:"tableId"`
-	SessionID     string `json:"sessionId"`
-	Guests        int    `json:"guests"`
-	SplitCount    int    `json:"splitCount"`
-	ExpectedTotal int64  `json:"expectedTotal"`
-	Method        string `json:"method"`
-	Key           string `json:"idempotencyKey"`
+	Action        string        `json:"action"`
+	TableID       string        `json:"tableId"`
+	SessionID     string        `json:"sessionId"`
+	Guests        int           `json:"guests"`
+	SplitCount    int           `json:"splitCount"`
+	Splits        []diningSplit `json:"splits"`
+	ExpectedTotal int64         `json:"expectedTotal"`
+	Method        string        `json:"method"`
+	Key           string        `json:"idempotencyKey"`
 }
 
 func (a *App) diningTable(w http.ResponseWriter, r *http.Request, id *Identity, g *Grant) {
@@ -36,9 +43,22 @@ func (a *App) diningTable(w http.ResponseWriter, r *http.Request, id *Identity, 
 		fail(w, 400, "Select a table and guest count")
 		return
 	}
-	if in.Action == "pay" && (in.SessionID == "" || in.SplitCount < 1 || in.SplitCount > 20 || (in.Method != "cash" && in.Method != "mock_card")) {
-		fail(w, 400, "Select a session, split count and payment method")
-		return
+	if in.Action == "pay" {
+		if in.SessionID == "" {
+			fail(w, 400, "Select a session")
+			return
+		}
+		if len(in.Splits) > 0 {
+			if len(in.Splits) > 20 {
+				fail(w, 400, "Too many splits")
+				return
+			}
+		} else {
+			if in.SplitCount < 1 || in.SplitCount > 20 || (in.Method != "cash" && in.Method != "mock_card") {
+				fail(w, 400, "Select a session, split count and payment method")
+				return
+			}
+		}
 	}
 	tx, e := a.db.BeginTx(r.Context(), nil)
 	if e != nil {
@@ -98,7 +118,16 @@ func (a *App) diningTable(w http.ResponseWriter, r *http.Request, id *Identity, 
 		entity = "session_" + token()
 		_, e = tx.Exec("INSERT INTO dining_table_sessions(id,organization_id,table_id,session_token,guest_count,status) VALUES(?,?,?,?,?,'active')", entity, id.OrganizationID, in.TableID, token(), in.Guests)
 		if e == nil {
-			_, e = tx.Exec("UPDATE dining_tables SET status='occupied' WHERE organization_id=? AND id=? AND status='vacant'", id.OrganizationID, in.TableID)
+			res, err := tx.Exec("UPDATE dining_tables SET status='occupied' WHERE organization_id=? AND id=? AND status='vacant'", id.OrganizationID, in.TableID)
+			if err != nil {
+				fail(w, 503, "Cannot occupy table")
+				return
+			}
+			n, err := res.RowsAffected()
+			if err != nil || n != 1 {
+				fail(w, 409, "Table unavailable or capacity exceeded")
+				return
+			}
 		}
 		result = map[string]any{"sessionId": entity}
 	} else {
@@ -131,18 +160,53 @@ func (a *App) diningTable(w http.ResponseWriter, r *http.Request, id *Identity, 
 			fail(w, 409, "Bill changed; refresh before collecting payment")
 			return
 		}
-		if int64(in.SplitCount) > total {
-			fail(w, 400, "Too many splits for the bill amount")
-			return
-		}
-		entity = "bill_" + token()
-		_, e = tx.Exec("INSERT INTO dining_bills(id,organization_id,session_id,subtotal,service_charge,final_amount,paid_amount,status) VALUES(?,?,?,?,?,?,?,'paid')", entity, id.OrganizationID, in.SessionID, subtotal, fee, total, total)
-		for i := 0; e == nil && i < in.SplitCount; i++ {
-			amount := total / int64(in.SplitCount)
-			if int64(i) < total%int64(in.SplitCount) {
-				amount++
+		splitsCount := in.SplitCount
+		if len(in.Splits) > 0 {
+			splitsCount = len(in.Splits)
+			var splitSum int64
+			for _, s := range in.Splits {
+				if s.Amount <= 0 || s.SplitIndex < 1 {
+					fail(w, 400, "Invalid split amount or index")
+					return
+				}
+				splitSum += s.Amount
 			}
-			_, e = tx.Exec("INSERT INTO dining_payments(id,organization_id,bill_id,amount,payment_method,split_index) VALUES(?,?,?,?,?,?)", "pay_"+token(), id.OrganizationID, entity, amount, in.Method, i+1)
+			if splitSum != total {
+				fail(w, 409, "Split amounts sum must equal bill total")
+				return
+			}
+			entity = "bill_" + token()
+			_, e = tx.Exec("INSERT INTO dining_bills(id,organization_id,session_id,subtotal,service_charge,final_amount,paid_amount,status) VALUES(?,?,?,?,?,?,?,'paid')", entity, id.OrganizationID, in.SessionID, subtotal, fee, total, total)
+			for _, s := range in.Splits {
+				if e != nil {
+					break
+				}
+				method := s.PaymentMethod
+				if method == "" {
+					method = in.Method
+				}
+				if method == "credit_card" {
+					method = "mock_card"
+				}
+				if method != "cash" && method != "mock_card" {
+					method = "cash"
+				}
+				_, e = tx.Exec("INSERT INTO dining_payments(id,organization_id,bill_id,amount,payment_method,split_index) VALUES(?,?,?,?,?,?)", "pay_"+token(), id.OrganizationID, entity, s.Amount, method, s.SplitIndex)
+			}
+		} else {
+			if int64(in.SplitCount) > total {
+				fail(w, 400, "Too many splits for the bill amount")
+				return
+			}
+			entity = "bill_" + token()
+			_, e = tx.Exec("INSERT INTO dining_bills(id,organization_id,session_id,subtotal,service_charge,final_amount,paid_amount,status) VALUES(?,?,?,?,?,?,?,'paid')", entity, id.OrganizationID, in.SessionID, subtotal, fee, total, total)
+			for i := 0; e == nil && i < in.SplitCount; i++ {
+				amount := total / int64(in.SplitCount)
+				if int64(i) < total%int64(in.SplitCount) {
+					amount++
+				}
+				_, e = tx.Exec("INSERT INTO dining_payments(id,organization_id,bill_id,amount,payment_method,split_index) VALUES(?,?,?,?,?,?)", "pay_"+token(), id.OrganizationID, entity, amount, in.Method, i+1)
+			}
 		}
 		if e == nil {
 			_, e = tx.Exec("UPDATE dining_table_sessions SET status='closed',closed_at=CURRENT_TIMESTAMP WHERE organization_id=? AND id=? AND status='active'", id.OrganizationID, in.SessionID)
@@ -153,7 +217,7 @@ func (a *App) diningTable(w http.ResponseWriter, r *http.Request, id *Identity, 
 		if e == nil {
 			_, e = tx.Exec("UPDATE dining_orders SET status='completed' WHERE organization_id=? AND session_id=? AND status='placed'", id.OrganizationID, in.SessionID)
 		}
-		result = map[string]any{"billId": entity, "subtotal": subtotal, "serviceCharge": fee, "total": total, "splits": in.SplitCount}
+		result = map[string]any{"billId": entity, "subtotal": subtotal, "serviceCharge": fee, "total": total, "splits": splitsCount}
 	}
 	if e != nil {
 		fail(w, 503, "Cannot save dining transaction")
